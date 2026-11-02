@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام حسابات رسوم المحكمة</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #0d9488;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .connection-status {
+            text-align: center;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        /* شريط التحكم والتاريخ */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .date-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+            background: #fff;
+        }
+
+        /* أزرار */
+        button {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+
+        .btn-success { background-color: #10b981; }
+        .btn-success:hover { background-color: #059669; }
+
+        .edit-btn {
+            background-color: #3b82f6;
+            padding: 6px 10px;
+            font-size: 0.85em;
+            margin-left: 5px;
+        }
+        .edit-btn:hover { background-color: #2563eb; }
+
+        .delete-btn {
+            background-color: #ef4444;
+            padding: 6px 10px;
+            font-size: 0.85em;
+        }
+        .delete-btn:hover { background-color: #dc2626; }
+
+        /* الأقسام الإحصائية */
+        .section-title {
+            font-size: 1.1em;
+            color: var(--primary);
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .stats-grid-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+            border-right: 5px solid var(--primary);
+            text-align: center;
+        }
+
+        .stat-card.carried { border-color: #f59e0b; }
+        .stat-card.today { border-color: #10b981; }
+        .stat-card.total { border-color: #6366f1; }
+
+        .stat-title { font-size: 0.85em; color: #64748b; margin-bottom: 5px; font-weight: 600; }
+        .stat-value { font-size: 1.3em; font-weight: bold; }
+
+        /* الجدول */
+        .section-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { background-color: #f1f5f9; color: var(--primary); }
+
+        /* النافذة المنبثقة (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #64748b;
+            line-height: 1;
+        }
+        .close-btn:hover { color: var(--text); }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            flex: 1;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>نظام حسابات رسوم المحكمة</h1>
+    <div class="connection-status">● متصل بقاعدة البيانات بنجاح (sara-23901)</div>
+
+    <!-- شريط التحكم والتاريخ -->
+    <div class="top-bar">
+        <div class="date-picker-container">
+            <label for="selectedDate"><strong>اختر التاريخ:</strong></label>
+            <input type="date" id="selectedDate" onchange="loadDataForDate()">
+        </div>
+        <button class="btn-success" onclick="openModal()">+ إضافة إدخال جديد</button>
+    </div>
+
+    <!-- 1. إجماليات اليوم المختار فقط -->
+    <div class="section-title">📅 إجمالي اليوم المختار فقط</div>
+    <div class="stats-grid-categories">
+        <div class="stat-card today">
+            <div class="stat-title">قضائي (اليوم)</div>
+            <div class="stat-value" id="sumQadayi">0</div>
+        </div>
+        <div class="stat-card today">
+            <div class="stat-title">طابع (اليوم)</div>
+            <div class="stat-value" id="sumTabae">0</div>
+        </div>
+        <div class="stat-card today">
+            <div class="stat-title">حملة (اليوم)</div>
+            <div class="stat-value" id="sumHamla">0</div>
+        </div>
+        <div class="stat-card today">
+            <div class="stat-title">غرامات (اليوم)</div>
+            <div class="stat-value" id="sumGharamat">0</div>
+        </div>
+        <div class="stat-card today">
+            <div class="stat-title">الإجمالي (اليوم)</div>
+            <div class="stat-value" id="todayTotal">0</div>
+        </div>
+    </div>
+
+    <!-- 2. المدوّر (الأيام السابقة فقط ضمن نفس الشهر) -->
+    <div class="section-title">📦 المدوّر (الأيام السابقة فقط في هذا الشهر)</div>
+    <div class="stats-grid-categories">
+        <div class="stat-card carried">
+            <div class="stat-title">مدور قضائي</div>
+            <div class="stat-value" id="carriedQadayi">0</div>
+        </div>
+        <div class="stat-card carried">
+            <div class="stat-title">مدور طابع</div>
+            <div class="stat-value" id="carriedTabae">0</div>
+        </div>
+        <div class="stat-card carried">
+            <div class="stat-title">مدور حملة</div>
+            <div class="stat-value" id="carriedHamla">0</div>
+        </div>
+        <div class="stat-card carried">
+            <div class="stat-title">مدور غرامات</div>
+            <div class="stat-value" id="carriedGharamat">0</div>
+        </div>
+        <div class="stat-card carried">
+            <div class="stat-title">المدور الشهري العام</div>
+            <div class="stat-value" id="carriedTotal">0</div>
+        </div>
+    </div>
+
+    <!-- 3. الإجمالي الكلي النهائي للشهر (اليوم + المدور الشهري) -->
+    <div class="section-title">⭐ الإجمالي الكلي للشهر (اليوم + المدوّر)</div>
+    <div class="stats-grid-categories">
+        <div class="stat-card total">
+            <div class="stat-title">كلي قضائي</div>
+            <div class="stat-value" id="grandQadayi">0</div>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-title">كلي طابع</div>
+            <div class="stat-value" id="grandTabae">0</div>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-title">كلي حملة</div>
+            <div class="stat-value" id="grandHamla">0</div>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-title">كلي غرامات</div>
+            <div class="stat-value" id="grandGharamat">0</div>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-title">الإجمالي الكلي للشهر</div>
+            <div class="stat-value" id="grandTotal">0</div>
+        </div>
+    </div>
+
+    <!-- جدول سجلات التاريخ المحدد -->
+    <div class="section-card" style="margin-top: 25px;">
+        <h3 id="tableTitle" style="margin-top:0; color:var(--primary);">سجل بيانات اليوم</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ت</th>
+                    <th>قضائي</th>
+                    <th>طابع</th>
+                    <th>حملة</th>
+                    <th>غرامات</th>
+                    <th>المجموع</th>
+                    <th>إجراء</th>
+                </tr>
+            </thead>
+            <tbody id="receiptsTableBody">
+                <!-- البيانات ستظهر هنا -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- النافذة المنبثقة لإدخال أو تعديل البيانات -->
+<div id="receiptModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h3 id="modalTitle" style="margin-top:0; color:var(--primary);">إدخال رسوم جديدة</h3>
+        <form id="receiptForm" onsubmit="saveReceipt(event)">
+            <input type="hidden" id="editKey">
+            <div class="form-group">
+                <label>قضائي</label>
+                <input type="number" id="qadayi" placeholder="0" min="0" step="any" oninput="calculateReceiptTotal()">
+            </div>
+            <div class="form-group">
+                <label>طابع</label>
+                <input type="number" id="tabae" placeholder="0" min="0" step="any" oninput="calculateReceiptTotal()">
+            </div>
+            <div class="form-group">
+                <label>حملة</label>
+                <input type="number" id="hamla" placeholder="0" min="0" step="any" oninput="calculateReceiptTotal()">
+            </div>
+            <div class="form-group">
+                <label>غرامات</label>
+                <input type="number" id="gharamat" placeholder="0" min="0" step="any" oninput="calculateReceiptTotal()">
+            </div>
+            <div class="form-group">
+                <label>مجموع الإدخال (تلقائي)</label>
+                <input type="number" id="receiptTotal" value="0" readonly style="background:#f1f5f9; font-weight:bold;">
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-success" id="saveBtnText">حفظ الإدخال</button>
+                <button type="button" style="background:#64748b;" onclick="closeModal()">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // إعدادات Firebase الخاصة بك
+    const firebaseConfig = {
+        databaseURL: "https://sara-23901-default-rtdb.firebaseio.com/",
+        projectId: "sara-23901"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ضبط التاريخ الافتراضي ليكون تاريخ اليوم بتوقيت الجهاز المحلي
+    const dateInput = document.getElementById('selectedDate');
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${year}-${month}-${day}`;
+
+    // فتح النافذة للإضافة
+    function openModal() {
+        document.getElementById('modalTitle').innerText = "إدخال رسوم جديدة";
+        document.getElementById('saveBtnText').innerText = "حفظ الإدخال";
+        document.getElementById('editKey').value = "";
+        
+        document.getElementById('qadayi').value = "";
+        document.getElementById('tabae').value = "";
+        document.getElementById('hamla').value = "";
+        document.getElementById('gharamat').value = "";
+        document.getElementById('receiptTotal').value = "0";
+        
+        const modal = document.getElementById('receiptModal');
+        modal.style.display = 'flex';
+        document.getElementById('qadayi').focus();
+    }
+
+    // فتح النافذة للتعديل
+    function openEditModal(key, qadayi, tabae, hamla, gharamat) {
+        document.getElementById('modalTitle').innerText = "تعديل البيانات";
+        document.getElementById('saveBtnText').innerText = "تحديث البيانات";
+        document.getElementById('editKey').value = key;
+
+        document.getElementById('qadayi').value = qadayi !== 0 ? qadayi : "";
+        document.getElementById('tabae').value = tabae !== 0 ? tabae : "";
+        document.getElementById('hamla').value = hamla !== 0 ? hamla : "";
+        document.getElementById('gharamat').value = gharamat !== 0 ? gharamat : "";
+        calculateReceiptTotal();
+
+        const modal = document.getElementById('receiptModal');
+        modal.style.display = 'flex';
+        document.getElementById('qadayi').focus();
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('receiptModal');
+        modal.style.display = 'none';
+        document.getElementById('receiptForm').reset();
+        document.getElementById('editKey').value = "";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('receiptModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    function calculateReceiptTotal() {
+        const q = parseFloat(document.getElementById('qadayi').value) || 0;
+        const t = parseFloat(document.getElementById('tabae').value) || 0;
+        const h = parseFloat(document.getElementById('hamla').value) || 0;
+        const g = parseFloat(document.getElementById('gharamat').value) || 0;
+        document.getElementById('receiptTotal').value = q + t + h + g;
+    }
+
+    function saveReceipt(e) {
+        e.preventDefault();
+        const selectedDate = dateInput.value;
+        if (!selectedDate) return alert("اختر تاريخاً أولاً");
+
+        const editKey = document.getElementById('editKey').value;
+        const receiptData = {
+            qadayi: parseFloat(document.getElementById('qadayi').value) || 0,
+            tabae: parseFloat(document.getElementById('tabae').value) || 0,
+            hamla: parseFloat(document.getElementById('hamla').value) || 0,
+            gharamat: parseFloat(document.getElementById('gharamat').value) || 0,
+            total: parseFloat(document.getElementById('receiptTotal').value) || 0,
+            timestamp: Date.now()
+        };
+
+        if (editKey) {
+            db.ref(`court_fees/daily_records/${selectedDate}/receipts/${editKey}`).set(receiptData, (err) => {
+                if (!err) closeModal();
+                else alert("حدث خطأ أثناء التحديث.");
+            });
+        } else {
+            db.ref(`court_fees/daily_records/${selectedDate}/receipts`).push(receiptData, (err) => {
+                if (!err) closeModal();
+                else alert("حدث خطأ أثناء الحفظ.");
+            });
+        }
+    }
+
+    function loadDataForDate() {
+        const selectedDate = dateInput.value;
+        if (!selectedDate) return;
+
+        document.getElementById('tableTitle').innerText = `سجل بيانات يوم: ${selectedDate}`;
+
+        db.ref(`court_fees/daily_records/${selectedDate}/receipts`).on('value', (snapshot) => {
+            const tableBody = document.getElementById('receiptsTableBody');
+            tableBody.innerHTML = '';
+            let todaySum = 0;
+            let sumQ = 0, sumT = 0, sumH = 0, sumG = 0;
+            let index = 1;
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnap) => {
+                    const key = childSnap.key;
+                    const item = childSnap.val();
+                    
+                    todaySum += item.total;
+                    sumQ += item.qadayi || 0;
+                    sumT += item.tabae || 0;
+                    sumH += item.hamla || 0;
+                    sumG += item.gharamat || 0;
+
+                    const row = `<tr>
+                        <td>${index++}</td>
+                        <td>${(item.qadayi || 0).toLocaleString()}</td>
+                        <td>${(item.tabae || 0).toLocaleString()}</td>
+                        <td>${(item.hamla || 0).toLocaleString()}</td>
+                        <td>${(item.gharamat || 0).toLocaleString()}</td>
+                        <td><strong>${(item.total || 0).toLocaleString()}</strong></td>
+                        <td>
+                            <button class="edit-btn" onclick="openEditModal('${key}', ${item.qadayi || 0}, ${item.tabae || 0}, ${item.hamla || 0}, ${item.gharamat || 0})">تعديل</button>
+                            <button class="delete-btn" onclick="deleteReceipt('${selectedDate}', '${key}')">حذف</button>
+                        </td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="7">لا توجد بيانات مدخلة لهذا اليوم</td></tr>`;
+            }
+
+            document.getElementById('todayTotal').innerText = todaySum.toLocaleString();
+            document.getElementById('sumQadayi').innerText = sumQ.toLocaleString();
+            document.getElementById('sumTabae').innerText = sumT.toLocaleString();
+            document.getElementById('sumHamla').innerText = sumH.toLocaleString();
+            document.getElementById('sumGharamat').innerText = sumG.toLocaleString();
+
+            calculateMonthlyCarriedAndTotals(selectedDate, sumQ, sumT, sumH, sumG, todaySum);
+        });
+    }
+
+    // حساب المدور للإيام السابقة فقط (dateKey < currentDate) ضمن نفس الشهر
+    function calculateMonthlyCarriedAndTotals(currentDate, todayQ, todayT, todayH, todayG, todaySum) {
+        const currentMonthPrefix = currentDate.substring(0, 7); // استخراج سنة وشهر مثل: "2026-11"
+
+        db.ref(`court_fees/daily_records`).once('value', (snapshot) => {
+            let carriedQ = 0, carriedT = 0, carriedH = 0, carriedG = 0, carriedTotal = 0;
+
+            if (snapshot.exists()) {
+                snapshot.forEach((daySnap) => {
+                    const dateKey = daySnap.key; // التاريخ بصيغة YYYY-MM-DD
+                    // التأكد التام أن التاريخ بنفس الشهر ولكنه ينتمي للأيام السابقة فقط (أصغر من اليوم الحالي)
+                    if (dateKey.startsWith(currentMonthPrefix) && dateKey < currentDate) {
+                        const receipts = daySnap.val().receipts;
+                        if (receipts) {
+                            Object.values(receipts).forEach(r => {
+                                carriedQ += (r.qadayi || 0);
+                                carriedT += (r.tabae || 0);
+                                carriedH += (r.hamla || 0);
+                                carriedG += (r.gharamat || 0);
+                                carriedTotal += (r.total || 0);
+                            });
+                        }
+                    }
+                });
+            }
+
+            // المدوّر يحسب الأيام السابقة فقط
+            document.getElementById('carriedQadayi').innerText = carriedQ.toLocaleString();
+            document.getElementById('carriedTabae').innerText = carriedT.toLocaleString();
+            document.getElementById('carriedHamla').innerText = carriedH.toLocaleString();
+            document.getElementById('carriedGharamat').innerText = carriedG.toLocaleString();
+            document.getElementById('carriedTotal').innerText = carriedTotal.toLocaleString();
+
+            // الإجمالي الكلي يجمع (المدور + اليوم)
+            document.getElementById('grandQadayi').innerText = (carriedQ + todayQ).toLocaleString();
+            document.getElementById('grandTabae').innerText = (carriedT + todayT).toLocaleString();
+            document.getElementById('grandHamla').innerText = (carriedH + todayH).toLocaleString();
+            document.getElementById('grandGharamat').innerText = (carriedG + todayG).toLocaleString();
+            document.getElementById('grandTotal').innerText = (carriedTotal + todaySum).toLocaleString();
+        });
+    }
+
+    function deleteReceipt(date, key) {
+        if (confirm("هل أنت متأكد من حذف هذا السجل؟")) {
+            db.ref(`court_fees/daily_records/${date}/receipts/${key}`).remove();
+        }
+    }
+
+    loadDataForDate();
+</script>
+</body>
+</html>
