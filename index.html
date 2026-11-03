@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>نظام حسابات رسوم المحكمة</title>
     <style>
         :root {
@@ -14,12 +14,113 @@
             --border: #e2e8f0;
         }
 
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
+            padding: 15px;
+            padding-top: max(15px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: max(15px, env(safe-area-inset-left));
+            padding-right: max(15px, env(safe-area-inset-right));
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* شاشة تسجيل الدخول */
+        #loginScreen {
+            display: flex;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 25px 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .password-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            -webkit-appearance: none;
+        }
+
+        .toggle-password {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 5px;
+            width: auto;
+        }
+
+        .login-card button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .login-card button[type="submit"]:active {
+            transform: scale(0.98);
+        }
+
+        .login-error {
+            color: #ef4444;
+            font-size: 0.85em;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* محتوى الموقع الأساسي */
+        #mainAppContent {
+            display: none;
         }
 
         .container {
@@ -31,12 +132,13 @@
             text-align: center;
             color: var(--primary);
             margin-bottom: 5px;
+            font-size: 1.5em;
         }
 
         .connection-status {
             text-align: center;
-            font-size: 0.85em;
-            margin-bottom: 20px;
+            font-size: 0.8em;
+            margin-bottom: 15px;
             color: #10b981;
             font-weight: bold;
         }
@@ -47,65 +149,91 @@
             justify-content: space-between;
             align-items: center;
             background: var(--card-bg);
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            margin-bottom: 15px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
 
         .date-picker-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .date-picker-container { width: auto; }
         }
 
         input[type="date"] {
-            padding: 8px 12px;
+            padding: 10px 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1em;
+            border-radius: 8px;
+            font-size: 16px;
             background: #fff;
+            flex: 1;
+            -webkit-appearance: none;
         }
 
-        /* أزرار */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .action-buttons { width: auto; }
+        }
+
+        /* أزرار الموقع */
         button {
             background-color: var(--primary);
             color: white;
-            padding: 10px 18px;
+            padding: 12px 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
+            font-size: 0.9em;
+            transition: opacity 0.2s, transform 0.1s;
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
-        button:hover { background-color: #1d4ed8; }
+        button:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
 
         .btn-success { background-color: #10b981; }
-        .btn-success:hover { background-color: #059669; }
+        .btn-info { background-color: #0284c7; }
 
         .edit-btn {
             background-color: #3b82f6;
             padding: 6px 10px;
-            font-size: 0.85em;
-            margin-left: 5px;
+            font-size: 0.8em;
+            margin-left: 4px;
+            border-radius: 6px;
         }
-        .edit-btn:hover { background-color: #2563eb; }
 
         .delete-btn {
             background-color: #ef4444;
             padding: 6px 10px;
-            font-size: 0.85em;
+            font-size: 0.8em;
+            border-radius: 6px;
         }
-        .delete-btn:hover { background-color: #dc2626; }
 
         /* الأقسام الإحصائية */
         .section-title {
-            font-size: 1.1em;
+            font-size: 1em;
             color: var(--primary);
-            margin: 20px 0 10px 0;
+            margin: 15px 0 10px 0;
             font-weight: bold;
             border-bottom: 2px solid var(--border);
             padding-bottom: 5px;
@@ -113,17 +241,23 @@
 
         .stats-grid-categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid-categories {
+                grid-template-columns: repeat(5, 1fr);
+            }
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 15px;
+            padding: 12px 10px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
-            border-right: 5px solid var(--primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-right: 4px solid var(--primary);
             text-align: center;
         }
 
@@ -131,32 +265,40 @@
         .stat-card.today { border-color: #10b981; }
         .stat-card.total { border-color: #6366f1; }
 
-        .stat-title { font-size: 0.85em; color: #64748b; margin-bottom: 5px; font-weight: 600; }
-        .stat-value { font-size: 1.3em; font-weight: bold; }
+        .stat-title { font-size: 0.75em; color: #64748b; margin-bottom: 4px; font-weight: 600; }
+        .stat-value { font-size: 1.15em; font-weight: bold; }
 
         /* الجدول */
         .section-card {
             background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
+            min-width: 500px;
         }
 
         th, td {
-            padding: 12px;
+            padding: 10px 8px;
             text-align: center;
             border-bottom: 1px solid var(--border);
+            font-size: 0.9em;
         }
 
-        th { background-color: #f1f5f9; color: var(--primary); }
+        th { background-color: #f1f5f9; color: var(--primary); font-weight: bold; }
 
-        /* النافذة المنبثقة (Modal) */
+        /* النوافذ المنبثقة */
         .modal {
             display: none;
             position: fixed;
@@ -165,59 +307,95 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
+            padding: 15px;
         }
 
         .modal-content {
             background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .modal-content-large {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 850px;
+            max-height: 85vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
             position: relative;
         }
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            left: 20px;
+            top: 12px;
+            left: 15px;
             font-size: 1.8em;
             cursor: pointer;
-            color: #64748b;
+            color: #94a3b8;
             line-height: 1;
         }
-        .close-btn:hover { color: var(--text); }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             flex-direction: column;
         }
 
         .form-group label {
-            font-size: 0.9em;
-            margin-bottom: 5px;
+            font-size: 0.85em;
+            margin-bottom: 4px;
             font-weight: 600;
         }
 
         .form-group input {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1em;
+            border-radius: 8px;
+            font-size: 16px;
+            -webkit-appearance: none;
         }
 
         .modal-actions {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
-        .modal-actions button {
-            flex: 1;
+
+        .month-report-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0 15px 0;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            text-align: center;
         }
+
+        @media (min-width: 600px) {
+            .month-report-summary {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .month-report-summary div div:first-child { font-size: 0.75em; color: #64748b; font-weight: 600; }
+        .month-report-summary div div:last-child { font-size: 1em; font-weight: bold; color: var(--primary); margin-top: 2px; }
     </style>
 
     <!-- Firebase SDK -->
@@ -226,113 +404,137 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>نظام حسابات رسوم المحكمة</h1>
-    <div class="connection-status">● متصل بقاعدة البيانات بنجاح (sara-23901)</div>
-
-    <!-- شريط التحكم والتاريخ -->
-    <div class="top-bar">
-        <div class="date-picker-container">
-            <label for="selectedDate"><strong>اختر التاريخ:</strong></label>
-            <input type="date" id="selectedDate" onchange="loadDataForDate()">
-        </div>
-        <button class="btn-success" onclick="openModal()">+ إضافة إدخال جديد</button>
+<!-- شاشة تسجيل الدخول -->
+<div id="loginScreen">
+    <div class="login-card">
+        <h2>تسجيل الدخول للنظام</h2>
+        <p style="color: #64748b; font-size: 0.85em; margin-bottom: 15px;">كلمة المرور الافتراضية هي: <b>1234</b></p>
+        <form onsubmit="handleLogin(event)">
+            <div class="password-container">
+                <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور" required autocomplete="current-password">
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">إظهار</button>
+            </div>
+            <button type="submit">دخول</button>
+            <div id="loginError" class="login-error">كلمة المرور غير صحيحة!</div>
+        </form>
     </div>
+</div>
 
-    <!-- 1. إجماليات اليوم المختار فقط -->
-    <div class="section-title">📅 إجمالي اليوم المختار فقط</div>
-    <div class="stats-grid-categories">
-        <div class="stat-card today">
-            <div class="stat-title">قضائي (اليوم)</div>
-            <div class="stat-value" id="sumQadayi">0</div>
-        </div>
-        <div class="stat-card today">
-            <div class="stat-title">طابع (اليوم)</div>
-            <div class="stat-value" id="sumTabae">0</div>
-        </div>
-        <div class="stat-card today">
-            <div class="stat-title">حملة (اليوم)</div>
-            <div class="stat-value" id="sumHamla">0</div>
-        </div>
-        <div class="stat-card today">
-            <div class="stat-title">غرامات (اليوم)</div>
-            <div class="stat-value" id="sumGharamat">0</div>
-        </div>
-        <div class="stat-card today">
-            <div class="stat-title">الإجمالي (اليوم)</div>
-            <div class="stat-value" id="todayTotal">0</div>
-        </div>
-    </div>
+<!-- المحتوى الرئيسي للموقع -->
+<div id="mainAppContent">
+    <div class="container">
+        <h1>نظام حسابات رسوم المحكمة</h1>
+        <div class="connection-status">● متصل بقاعدة البيانات بنجاح (sara-23901)</div>
 
-    <!-- 2. المدوّر (الأيام السابقة فقط ضمن نفس الشهر) -->
-    <div class="section-title">📦 المدوّر (الأيام السابقة فقط في هذا الشهر)</div>
-    <div class="stats-grid-categories">
-        <div class="stat-card carried">
-            <div class="stat-title">مدور قضائي</div>
-            <div class="stat-value" id="carriedQadayi">0</div>
+        <!-- شريط التحكم والتاريخ -->
+        <div class="top-bar">
+            <div class="date-picker-container">
+                <label for="selectedDate"><strong>التاريخ:</strong></label>
+                <input type="date" id="selectedDate" onchange="loadDataForDate()">
+            </div>
+            <div class="action-buttons">
+                <button class="btn-info" onclick="openMonthReportModal()">📊 تقرير الشهر</button>
+                <button class="btn-success" onclick="openModal()">+ إدخال جديد</button>
+            </div>
         </div>
-        <div class="stat-card carried">
-            <div class="stat-title">مدور طابع</div>
-            <div class="stat-value" id="carriedTabae">0</div>
-        </div>
-        <div class="stat-card carried">
-            <div class="stat-title">مدور حملة</div>
-            <div class="stat-value" id="carriedHamla">0</div>
-        </div>
-        <div class="stat-card carried">
-            <div class="stat-title">مدور غرامات</div>
-            <div class="stat-value" id="carriedGharamat">0</div>
-        </div>
-        <div class="stat-card carried">
-            <div class="stat-title">المدور الشهري العام</div>
-            <div class="stat-value" id="carriedTotal">0</div>
-        </div>
-    </div>
 
-    <!-- 3. الإجمالي الكلي النهائي للشهر (اليوم + المدور الشهري) -->
-    <div class="section-title">⭐ الإجمالي الكلي للشهر (اليوم + المدوّر)</div>
-    <div class="stats-grid-categories">
-        <div class="stat-card total">
-            <div class="stat-title">كلي قضائي</div>
-            <div class="stat-value" id="grandQadayi">0</div>
+        <!-- 1. إجماليات اليوم المختار فقط -->
+        <div class="section-title">📅 إجمالي اليوم المختار فقط</div>
+        <div class="stats-grid-categories">
+            <div class="stat-card today">
+                <div class="stat-title">قضائي (اليوم)</div>
+                <div class="stat-value" id="sumQadayi">0</div>
+            </div>
+            <div class="stat-card today">
+                <div class="stat-title">طابع (اليوم)</div>
+                <div class="stat-value" id="sumTabae">0</div>
+            </div>
+            <div class="stat-card today">
+                <div class="stat-title">حملة (اليوم)</div>
+                <div class="stat-value" id="sumHamla">0</div>
+            </div>
+            <div class="stat-card today">
+                <div class="stat-title">غرامات (اليوم)</div>
+                <div class="stat-value" id="sumGharamat">0</div>
+            </div>
+            <div class="stat-card today" style="grid-column: span 2;">
+                <div class="stat-title">الإجمالي (اليوم)</div>
+                <div class="stat-value" id="todayTotal">0</div>
+            </div>
         </div>
-        <div class="stat-card total">
-            <div class="stat-title">كلي طابع</div>
-            <div class="stat-value" id="grandTabae">0</div>
-        </div>
-        <div class="stat-card total">
-            <div class="stat-title">كلي حملة</div>
-            <div class="stat-value" id="grandHamla">0</div>
-        </div>
-        <div class="stat-card total">
-            <div class="stat-title">كلي غرامات</div>
-            <div class="stat-value" id="grandGharamat">0</div>
-        </div>
-        <div class="stat-card total">
-            <div class="stat-title">الإجمالي الكلي للشهر</div>
-            <div class="stat-value" id="grandTotal">0</div>
-        </div>
-    </div>
 
-    <!-- جدول سجلات التاريخ المحدد -->
-    <div class="section-card" style="margin-top: 25px;">
-        <h3 id="tableTitle" style="margin-top:0; color:var(--primary);">سجل بيانات اليوم</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ت</th>
-                    <th>قضائي</th>
-                    <th>طابع</th>
-                    <th>حملة</th>
-                    <th>غرامات</th>
-                    <th>المجموع</th>
-                    <th>إجراء</th>
-                </tr>
-            </thead>
-            <tbody id="receiptsTableBody">
-                <!-- البيانات ستظهر هنا -->
-            </tbody>
-        </table>
+        <!-- 2. المدوّر (الأيام السابقة فقط ضمن نفس الشهر) -->
+        <div class="section-title">📦 المدوّر (الأيام السابقة فقط في هذا الشهر)</div>
+        <div class="stats-grid-categories">
+            <div class="stat-card carried">
+                <div class="stat-title">مدور قضائي</div>
+                <div class="stat-value" id="carriedQadayi">0</div>
+            </div>
+            <div class="stat-card carried">
+                <div class="stat-title">مدور طابع</div>
+                <div class="stat-value" id="carriedTabae">0</div>
+            </div>
+            <div class="stat-card carried">
+                <div class="stat-title">مدور حملة</div>
+                <div class="stat-value" id="carriedHamla">0</div>
+            </div>
+            <div class="stat-card carried">
+                <div class="stat-title">مدور غرامات</div>
+                <div class="stat-value" id="carriedGharamat">0</div>
+            </div>
+            <div class="stat-card carried" style="grid-column: span 2;">
+                <div class="stat-title">المدور الشهري العام</div>
+                <div class="stat-value" id="carriedTotal">0</div>
+            </div>
+        </div>
+
+        <!-- 3. الإجمالي الكلي النهائي للشهر (اليوم + المدور الشهري) -->
+        <div class="section-title">⭐ الإجمالي الكلي للشهر (اليوم + المدوّر)</div>
+        <div class="stats-grid-categories">
+            <div class="stat-card total">
+                <div class="stat-title">كلي قضائي</div>
+                <div class="stat-value" id="grandQadayi">0</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-title">كلي طابع</div>
+                <div class="stat-value" id="grandTabae">0</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-title">كلي حملة</div>
+                <div class="stat-value" id="grandHamla">0</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-title">كلي غرامات</div>
+                <div class="stat-value" id="grandGharamat">0</div>
+            </div>
+            <div class="stat-card total" style="grid-column: span 2;">
+                <div class="stat-title">الإجمالي الكلي للشهر</div>
+                <div class="stat-value" id="grandTotal">0</div>
+            </div>
+        </div>
+
+        <!-- جدول سجلات التاريخ المحدد -->
+        <div class="section-card" style="margin-top: 20px;">
+            <h3 id="tableTitle" style="margin-top:0; color:var(--primary); font-size: 1.1em;">سجل بيانات اليوم</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ت</th>
+                            <th>قضائي</th>
+                            <th>طابع</th>
+                            <th>حملة</th>
+                            <th>غرامات</th>
+                            <th>المجموع</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receiptsTableBody">
+                        <!-- البيانات ستظهر هنا -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -340,7 +542,7 @@
 <div id="receiptModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h3 id="modalTitle" style="margin-top:0; color:var(--primary);">إدخال رسوم جديدة</h3>
+        <h3 id="modalTitle" style="margin-top:0; color:var(--primary); font-size: 1.2em;">إدخال رسوم جديدة</h3>
         <form id="receiptForm" onsubmit="saveReceipt(event)">
             <input type="hidden" id="editKey">
             <div class="form-group">
@@ -371,6 +573,55 @@
     </div>
 </div>
 
+<!-- النافذة المنبثقة لتقرير الشهر الحالي -->
+<div id="monthReportModal" class="modal">
+    <div class="modal-content-large">
+        <span class="close-btn" onclick="closeMonthReportModal()">&times;</span>
+        <h3 id="monthReportTitle" style="margin-top:0; color:var(--primary); text-align:center; font-size: 1.2em;">تقرير جميع وصولات الشهر</h3>
+        
+        <div class="month-report-summary">
+            <div>
+                <div>قضائي (الشهر)</div>
+                <div id="repSumQadayi">0</div>
+            </div>
+            <div>
+                <div>طابع (الشهر)</div>
+                <div id="repSumTabae">0</div>
+            </div>
+            <div>
+                <div>حملة (الشهر)</div>
+                <div id="repSumHamla">0</div>
+            </div>
+            <div>
+                <div>غرامات (الشهر)</div>
+                <div id="repSumGharamat">0</div>
+            </div>
+            <div style="grid-column: span 2;">
+                <div>المجموع الكلي للشهر</div>
+                <div id="repSumTotal" style="color:#10b981;">0</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>قضائي</th>
+                        <th>طابع</th>
+                        <th>حملة</th>
+                        <th>غرامات</th>
+                        <th>المجموع</th>
+                    </tr>
+                </thead>
+                <tbody id="monthReportTableBody">
+                    <!-- بيانات الشهر -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
     // إعدادات Firebase الخاصة بك
     const firebaseConfig = {
@@ -381,7 +632,55 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ضبط التاريخ الافتراضي ليكون تاريخ اليوم بتوقيت الجهاز المحلي
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('passwordInput');
+        const btn = document.querySelector('.toggle-password');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            btn.innerText = 'إخفاء';
+        } else {
+            passwordInput.type = 'password';
+            btn.innerText = 'إظهار';
+        }
+    }
+
+    function handleLogin(e) {
+        e.preventDefault();
+        const enteredPassword = document.getElementById('passwordInput').value.trim();
+        const errorDiv = document.getElementById('loginError');
+
+        db.ref('court_fees/settings/password').once('value', (snapshot) => {
+            let correctPassword = "1234"; // كلمة مرور افتراضية مضمونة
+            if (snapshot.exists() && snapshot.val()) {
+                let dbVal = String(snapshot.val()).trim();
+                // تنظيف القيمة إذا وجد أي علامات تنصيص عرضية في الفايربيس
+                correctPassword = dbVal.replace(/^["'](.+)["']$/, '$1');
+            } else {
+                // إذا لم تكن موجودة، ضبطها تلقائياً بالفايربيس
+                db.ref('court_fees/settings/password').set("1234");
+            }
+
+            if (enteredPassword === correctPassword) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainAppContent').style.display = 'block';
+                loadDataForDate();
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }, (error) => {
+            // في حال فشل اتصال الفايربيس مؤقتاً، السماح بالدخول بكلمة المرور الافتراضية
+            if (enteredPassword === "1234") {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainAppContent').style.display = 'block';
+                loadDataForDate();
+            } else {
+                errorDiv.style.display = 'block';
+            }
+        });
+    }
+
     const dateInput = document.getElementById('selectedDate');
     const today = new Date();
     const year = today.getFullYear();
@@ -389,7 +688,6 @@
     const day = String(today.getDate()).padStart(2, '0');
     dateInput.value = `${year}-${month}-${day}`;
 
-    // فتح النافذة للإضافة
     function openModal() {
         document.getElementById('modalTitle').innerText = "إدخال رسوم جديدة";
         document.getElementById('saveBtnText').innerText = "حفظ الإدخال";
@@ -406,7 +704,6 @@
         document.getElementById('qadayi').focus();
     }
 
-    // فتح النافذة للتعديل
     function openEditModal(key, qadayi, tabae, hamla, gharamat) {
         document.getElementById('modalTitle').innerText = "تعديل البيانات";
         document.getElementById('saveBtnText').innerText = "تحديث البيانات";
@@ -430,11 +727,26 @@
         document.getElementById('editKey').value = "";
     }
 
+    function openMonthReportModal() {
+        const selectedDate = dateInput.value;
+        const currentMonthPrefix = selectedDate.substring(0, 7);
+        document.getElementById('monthReportTitle').innerText = `تقرير جميع وصولات شهر: ${currentMonthPrefix}`;
+        
+        loadMonthReportData(currentMonthPrefix);
+
+        const modal = document.getElementById('monthReportModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeMonthReportModal() {
+        document.getElementById('monthReportModal').style.display = 'none';
+    }
+
     window.onclick = function(event) {
         const modal = document.getElementById('receiptModal');
-        if (event.target == modal) {
-            closeModal();
-        }
+        const monthModal = document.getElementById('monthReportModal');
+        if (event.target == modal) closeModal();
+        if (event.target == monthModal) closeMonthReportModal();
     }
 
     function calculateReceiptTotal() {
@@ -525,17 +837,72 @@
         });
     }
 
-    // حساب المدور للإيام السابقة فقط (dateKey < currentDate) ضمن نفس الشهر
+    function loadMonthReportData(monthPrefix) {
+        db.ref(`court_fees/daily_records`).once('value', (snapshot) => {
+            const reportTableBody = document.getElementById('monthReportTableBody');
+            reportTableBody.innerHTML = '';
+
+            let mSumQ = 0, mSumT = 0, mSumH = 0, mSumG = 0, mSumTotal = 0;
+            let hasData = false;
+
+            if (snapshot.exists()) {
+                const allDays = [];
+                snapshot.forEach((daySnap) => {
+                    const dateKey = daySnap.key;
+                    if (dateKey.startsWith(monthPrefix)) {
+                        allDays.push({ date: dateKey, data: daySnap.val().receipts });
+                    }
+                });
+
+                allDays.sort((a, b) => a.date.localeCompare(b.date));
+
+                allDays.forEach(dayObj => {
+                    const date = dayObj.date;
+                    const receipts = dayObj.data;
+                    if (receipts) {
+                        Object.values(receipts).forEach(r => {
+                            hasData = true;
+                            mSumQ += (r.qadayi || 0);
+                            mSumT += (r.tabae || 0);
+                            mSumH += (r.hamla || 0);
+                            mSumG += (r.gharamat || 0);
+                            mSumTotal += (r.total || 0);
+
+                            const row = `<tr>
+                                <td><strong>${date}</strong></td>
+                                <td>${(r.qadayi || 0).toLocaleString()}</td>
+                                <td>${(r.tabae || 0).toLocaleString()}</td>
+                                <td>${(r.hamla || 0).toLocaleString()}</td>
+                                <td>${(r.gharamat || 0).toLocaleString()}</td>
+                                <td><strong>${(r.total || 0).toLocaleString()}</strong></td>
+                            </tr>`;
+                            reportTableBody.innerHTML += row;
+                        });
+                    }
+                });
+            }
+
+            if (!hasData) {
+                reportTableBody.innerHTML = `<tr><td colspan="6">لا توجد وصولات مسجلة لهذا الشهر حتى الآن</td></tr>`;
+            }
+
+            document.getElementById('repSumQadayi').innerText = mSumQ.toLocaleString();
+            document.getElementById('repSumTabae').innerText = mSumT.toLocaleString();
+            document.getElementById('repSumHamla').innerText = mSumH.toLocaleString();
+            document.getElementById('repSumGharamat').innerText = mSumG.toLocaleString();
+            document.getElementById('repSumTotal').innerText = mSumTotal.toLocaleString();
+        });
+    }
+
     function calculateMonthlyCarriedAndTotals(currentDate, todayQ, todayT, todayH, todayG, todaySum) {
-        const currentMonthPrefix = currentDate.substring(0, 7); // استخراج سنة وشهر مثل: "2026-11"
+        const currentMonthPrefix = currentDate.substring(0, 7);
 
         db.ref(`court_fees/daily_records`).once('value', (snapshot) => {
             let carriedQ = 0, carriedT = 0, carriedH = 0, carriedG = 0, carriedTotal = 0;
 
             if (snapshot.exists()) {
                 snapshot.forEach((daySnap) => {
-                    const dateKey = daySnap.key; // التاريخ بصيغة YYYY-MM-DD
-                    // التأكد التام أن التاريخ بنفس الشهر ولكنه ينتمي للأيام السابقة فقط (أصغر من اليوم الحالي)
+                    const dateKey = daySnap.key;
                     if (dateKey.startsWith(currentMonthPrefix) && dateKey < currentDate) {
                         const receipts = daySnap.val().receipts;
                         if (receipts) {
@@ -551,14 +918,12 @@
                 });
             }
 
-            // المدوّر يحسب الأيام السابقة فقط
             document.getElementById('carriedQadayi').innerText = carriedQ.toLocaleString();
             document.getElementById('carriedTabae').innerText = carriedT.toLocaleString();
             document.getElementById('carriedHamla').innerText = carriedH.toLocaleString();
             document.getElementById('carriedGharamat').innerText = carriedG.toLocaleString();
             document.getElementById('carriedTotal').innerText = carriedTotal.toLocaleString();
 
-            // الإجمالي الكلي يجمع (المدور + اليوم)
             document.getElementById('grandQadayi').innerText = (carriedQ + todayQ).toLocaleString();
             document.getElementById('grandTabae').innerText = (carriedT + todayT).toLocaleString();
             document.getElementById('grandHamla').innerText = (carriedH + todayH).toLocaleString();
@@ -572,8 +937,6 @@
             db.ref(`court_fees/daily_records/${date}/receipts/${key}`).remove();
         }
     }
-
-    loadDataForDate();
 </script>
 </body>
 </html>
